@@ -1,0 +1,6 @@
+{
+    "Alpaca-cleaned-3-stages": ["en-alpaca_data-cleaned-stage1.jsonl","en-alpaca_data-cleaned-stage2.jsonl","en-alpaca_data-cleaned-stage3.jsonl"],
+    "total_llama_tokens": 0,
+    "dataset": "Alpaca52K-cleaned",
+    "Alpaca-cleaned_file": ["en-alpaca_data-cleaned-stages-all.jsonl"],
+}

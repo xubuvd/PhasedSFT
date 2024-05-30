@@ -1,0 +1,6 @@
+{
+    "Alpaca-3-stages_files": ['en-alpaca52k-stage1.jsonl','en-alpaca52k-stage2.jsonl','en-alpaca52k-stage3.jsonl'],
+    "total_llama_tokens": 0,
+    "dataset": "Alpaca52k",
+    "Alpaca52k_file": ['en-alpaca52k-stages-all.jsonl'],
+}
