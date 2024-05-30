@@ -1,5 +1,5 @@
 # Phased Instruction Fine-Tuning for Large Language Models
-This repository provides an overview of all components from the paper <Phased Instruction Fine-Tuning for Large Language Models>
+This repository provides an overview of all components from the paper Phased Instruction Fine-Tuning for Large Language Models.
 
 # Citation
 ```
