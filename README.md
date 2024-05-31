@@ -1,5 +1,6 @@
 # Phased Instruction Fine-Tuning for Large Language Models
-This repository provides an overview of all components from the paper Phased Instruction Fine-Tuning for Large Language Models.
+This repository provides an overview of all components from the paper Phased Instruction Fine-Tuning for Large Language Models, ACL 2024 Findings.
+
 
 # Citation
 ```
@@ -12,10 +13,12 @@ This repository provides an overview of all components from the paper Phased Ins
 }
 ```
 
+
 # Code
 ## bash
 run.sh: training bash<br>
 stopall.sh: killing<br>
+
 
 ## code dir
 generation dir: making inference on 'oasst' 'anthropic' 'koala' 'vicuna' 'sinstruct' 'wizardlm'<br>
