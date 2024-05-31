@@ -28,7 +28,11 @@ xllm dir: traing codes and dataloader<br>
 
 
 # Datasets
-The instruction difficulty within the Alpaca and Alpaca-cleaned data are quantitatively assessed by GPT-4, assigning scores from 1 to 5, with higher score denoting increased complexity.
+The instruction difficulty within the Alpaca and Alpaca-cleaned data are quantitatively assessed by GPT-4, assigning scores from 1 to 5, with higher score denoting increased complexity.<br>
+
+Alpaca-scored: Alpaca 52k dataset scored by the strongest gpt-4-0613, then splited into three stages with difficult increasing.<br>
+Alpaca-clean-scored: Alpaca-clean 52k dataset scored by gpt-4-0613 too.<br>
+
 
 ## Alpaca 52K scored by gpt-4-0613
 ![alpaca_data-gpt-4-0613_v1-score-dist](https://github.com/xubuvd/PhasedSFT/assets/59753505/f93ce7c1-9987-4a54-94d4-ed0455cc1ac2)
