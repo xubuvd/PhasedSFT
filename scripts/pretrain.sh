@@ -13,7 +13,7 @@ train_embed="False"
 tie_embed="False"
 
 nodes=
-#master_addr=172.16.19.45
+#master_addr=
 gpu_per_node=8
 
 datestr=`date +"%Y-%m-%d"`
@@ -24,7 +24,7 @@ echo "wandb_run_name=$wandb_run_name"
 data_path=/data/usr/pangwei/frontllm/sft/paper/sft_train5_random_ablation
 
 data_suffix=".jsonl"
-output_path=/data/usr/pangwei/placeholder
+output_path=/data/usr/pangwei/XXXXX
 echo "data_suffix=$data_suffix"
 echo "output_path=$output_path"
 
@@ -40,9 +40,7 @@ bs_per_dev=16
 #16 for llama-13b
 #4 for llama-70b
 
-# 4M token/global_step, 76.8k global_steps mean 300B token
-#train_steps=76800
-# save model per 500 global_step (2B token, 3h)
+# save model per 500 global_step
 ckpt_steps=100000
 train_epoch=20
 
