@@ -5,7 +5,7 @@ This repository provides an overview of all components from the paper Phased Ins
 # Citation
 ```
 @Inproceedings{PhasedSFT,
-    author = {Wei Pang and Chuan Zhou  and Xiao-Hua Zhou and Xiaojie Wang},
+    author = {Wei Pang and Chuan Zhou and Xiao-Hua Zhou and Xiaojie Wang},
     title = {Phased Instruction Fine-Tuning for Large Language Models},
     booktitle = {ACL Findings},
     year = {2024},
