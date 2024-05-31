@@ -1,0 +1,203 @@
+#!/usr/bin/env python
+
+import os
+import pathlib
+import signal
+import subprocess
+import sys
+import time
+
+from loguru import logger
+
+# EXPORT_ENVS = ["PYTHONPATH", "PATH"]
+EXPORT_ENVS = ["PYTHONPATH", "NCCL_"]
+
+
+def parse_nodes(nodes_arg):
+    path = pathlib.Path(nodes_arg)
+    if path.is_file():
+        with open(path, "r") as file:
+            nodes = [i.strip() for i in file.readlines()]
+    else:
+        nodes = nodes_arg.split(",")
+    return nodes
+
+
+def get_master_addr7port():
+    import socket
+    from contextlib import closing
+
+    from torch.distributed.elastic.agent.server.api import (
+        _get_fq_hostname,
+        _get_socket_with_port,
+    )
+
+    sock = _get_socket_with_port()
+    with closing(sock):
+        master_port = sock.getsockname()[1]
+
+    hostname = _get_fq_hostname()
+    master_addr = socket.gethostbyname(hostname)
+
+    return master_addr, master_port
+
+
+def get_cmd(env, config):
+    # 1. prepare args
+    master_addr, master_port = get_master_addr7port()
+    logger.info(f"Auto-detected {master_addr=}, {master_port=}")
+
+    nodes = parse_nodes(config.nodes)
+    logger.info(f"Nodes are: {nodes}")
+    if master_addr in nodes:
+        nodes.remove(master_addr)
+        nodes.insert(
+            0, master_addr
+        )  # move master_addr to 1st element, so pdsh will assign %n of master_addr to 0
+    else:
+        raise RuntimeError("master_addr should be one of nodes")
+    logger.info(f"Ordered Nodes are: {nodes}")
+
+    # 2. prepare envs
+    exported_envs = [
+        f"export {k}={v};"
+        for (k, v) in env.items()
+        if any(k.startswith(prefix) for prefix in EXPORT_ENVS)
+    ]
+    exports = "".join(exported_envs)
+
+    cmd = [exports, f"cd {os.path.abspath('.')};"]
+
+    # 3. extract args for torchrun from dist_torchrun
+    args = sys.argv
+    launch_script_name = os.path.basename(__file__)
+    for i, arg in enumerate(args):
+        if launch_script_name in arg:
+            args = args[i + 1 :]
+            break
+
+    def _del_arg(key: str, is_flag: bool):
+        try:
+            index = args.index(key)
+            end_index = index + 1 if is_flag else index + 2
+            del args[index:end_index]
+        except ValueError:
+            return
+
+    _del_arg("--nodes", is_flag=False)
+    _del_arg("--debug-nsys", is_flag=True)
+    _del_arg("--only-print", is_flag=True)
+
+    # 4. add torchrun args if not specified
+    def _add_arg(key, value):
+        for arg in args:
+            if key in arg:
+                return
+        args.insert(0, f"--{key}={value}")
+
+    _add_arg("nnodes", len(nodes))
+    _add_arg("node-rank", "%n")  # %n will be replaced by pdsh command
+    _add_arg("master-addr", master_addr)
+    _add_arg("master-port", master_port)
+
+    # 5. concat cmd
+    if config.debug_nsys:
+        cmd += [
+            "nsys profile",
+            "-w true -t cuda,nvtx,osrt,cudnn,cublas -s cpu --osrt-threshold=10000",
+            "-o nsight_report -f true",
+            "--capture-range=cudaProfilerApi --capture-range-end=stop",
+        ]
+        logger.warning("You pass --debug-nsys, so launch with Nsight System.")
+    cmd += ["/usr/local/bin/torchrun"]
+    cmd += args
+    logger.info(f"{cmd=}")
+    cmd_str = " ".join(
+        cmd
+    )  # convert all cmd args into str so it will be passed as single arg to pdsh
+
+    PDSH_MAX_FAN_OUT = 1024
+    pdsh_cmd_args = [
+        "pdsh",
+        "-S",
+        "-R",
+        "ssh",
+        "-f",
+        str(PDSH_MAX_FAN_OUT),
+        "-w",
+        ",".join(nodes),
+    ]
+    launch_cmd = pdsh_cmd_args + [cmd_str]
+
+    core_cmd = [i + "\\" for i in cmd[2:]]
+    kill_cmd = pdsh_cmd_args + ["pkill", "-f", " ".join(core_cmd)]
+
+    return launch_cmd, kill_cmd
+
+
+def dist_torchrun(args):
+    env = os.environ.copy()
+    cmd, kill_cmd = get_cmd(env, args)
+    logger.info(f"Launch Cmd:  {' '.join(cmd)}")
+    logger.info(f"Kill Cmd: {' '.join(kill_cmd)}")
+
+    if args.only_print:
+        logger.warning("You pass the --only-print, so the launch_cmd is not executed")
+        return
+
+    result = subprocess.Popen(cmd, env=env)
+
+    def sigkill_handler(signum, frame):
+        result.send_signal(signal.SIGINT)
+        time.sleep(0.1)
+        result.send_signal(signal.SIGTERM)
+        result_kill = subprocess.Popen(kill_cmd, env=env)
+        result_kill.wait()
+        time.sleep(1)
+        sys.exit(1)
+
+    signal.signal(signal.SIGINT, sigkill_handler)
+
+    result.wait()
+
+    # In case of failure must propagate the error-condition back to the caller.
+    # The actual error and traceback should have been printed in the subprocess,
+    # so in order to avoid unnecessary noise we just quietly exit here
+    # with the same code as the subprocess
+    if result.returncode > 0:
+        sys.exit(result.returncode)
+
+
+def hook_get_args_parser(old_get_args_parser):
+    from torch.distributed.argparse_util import env
+
+    parser = old_get_args_parser()
+    parser.add_argument(
+        "--nodes",
+        action=env,
+        type=str,
+        default="localhost",
+        help="mulitiple nodes(--nodes dev58,dev60) or nodes fiels(--nodes nodes_file)",
+    )
+    parser.add_argument(
+        "--debug-nsys",
+        action="store_true",
+        help="whether to debug with nsight system",
+    )
+    parser.add_argument(
+        "--only-print",
+        "-P",
+        action="store_true",
+        help="whether to run launch cmd",
+    )
+    return parser
+
+
+if __name__ == "__main__":
+    import torch
+    from torch.distributed.run import get_args_parser
+
+    logger.add("./logs/dist_torchrun.{time}.log")
+    parser = hook_get_args_parser(get_args_parser)
+    args = parser.parse_args()
+    dist_torchrun(args)

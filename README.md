@@ -13,7 +13,16 @@ This repository provides an overview of all components from the paper Phased Ins
 ```
 
 # Code
-coming soon...
+## bash
+run.sh: training bash<br>
+stopall.sh: killing<br>
+
+## code dir
+generation dir: making inference on 'oasst' 'anthropic' 'koala' 'vicuna' 'sinstruct' 'wizardlm'<br>
+evaluation dir: scoring with gpt-4-0613 and then calculating the Win-Rate metric<br>
+scripts dir: training scripts<br>
+xllm dir: traing codes and dataloader<br>
+
 
 # Datasets
 The instruction difficulty within the Alpaca and Alpaca-cleaned data are quantitatively assessed by GPT-4, assigning scores from 1 to 5, with higher score denoting increased complexity.
