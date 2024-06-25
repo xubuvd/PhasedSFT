@@ -21,10 +21,22 @@ stopall.sh: killing<br>
 
 
 ## code dir
-generation dir: making inference on 'oasst' 'anthropic' 'koala' 'vicuna' 'sinstruct' 'wizardlm'<br>
-evaluation dir: scoring with gpt-4-0613 and then calculating the Win-Rate metric<br>
-scripts dir: training scripts<br>
-xllm dir: traing codes and dataloader<br>
+###1.generation dir: making inference on 'oasst' 'anthropic' 'koala' 'vicuna' 'sinstruct' 'wizardlm'<br>
+```
+bash evaluation.sh<br>
+```
+<br>
+
+###2.evaluation dir: scoring with gpt-4-0613 and then calculating the Win-Rate metric<br>
+```
+bash run_gpt4_scoring.sh<br>
+bash run_win_rate.sh<br>
+```
+<br>
+
+###3.scripts dir: training scripts<br>
+
+###4.xllm dir: traing codes and dataloader<br>
 
 
 # Datasets
