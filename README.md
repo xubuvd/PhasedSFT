@@ -16,20 +16,22 @@ This repository provides an overview of all components from the paper Phased Ins
 
 # Code
 ## bash
-run.sh: training bash<br>
-stopall.sh: killing<br>
+```
+bash run.sh
+bash stopall.sh
+```
 
 ## code dir
 ###1.generation dir: making inference on 'oasst' 'anthropic' 'koala' 'vicuna' 'sinstruct' 'wizardlm'<br>
 ```
-bash evaluation.sh<br>
+bash evaluation.sh
 ```
 <br>
 
 ###2.evaluation dir: scoring with gpt-4-0613 and then calculating the Win-Rate metric<br>
 ```
-bash run_gpt4_scoring.sh<br>
-bash run_win_rate.sh<br>
+bash run_gpt4_scoring.sh
+bash run_win_rate.sh
 ```
 <br>
 
