@@ -1,7 +1,7 @@
 # Phased Instruction Fine-Tuning for Large Language Models
 该仓库开源了《Phased Instruction Fine-Tuning for Large Language Models》论文中的所有代码和数据，该论文将发表在 ACL 2024 Findings。<br>
-This repository provides an overview of all components from the paper Phased Instruction Fine-Tuning for Large Language Models, ACL 2024 Findings.
-
+This repository provides an overview of all components from the paper Phased Instruction Fine-Tuning for Large Language Models, ACL 2024 Findings.<br>
+https://aclanthology.org/2024.findings-acl.341/
 
 # 引用 Citation
 ```
